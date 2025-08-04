@@ -17,7 +17,7 @@
 - [Severity Classification](#severity-classification)
 - [Summary](#summary)
 - [Findings](#findings)
-  - [Low Risk findings (0)](#low-risk-findings-0)
+  - [Low Risk Findings (0)](#low-risk-findings-0)
     - [1. Op-challenger Docker image does not include Cannon embeds](#false-positive-op-challenger-docker-image-does-not-include-cannon-embeds)
 
 # Disclaimer
@@ -64,7 +64,7 @@ The change consists of a core update for supporting the `F_GETFD` syscall in the
 
 
 # Findings
-## Low Risk findings (0)
+## Low Risk Findings (0)
 
 ### [False positive] Op-challenger Docker image does not include Cannon embeds
 #### Description
