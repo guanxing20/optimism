@@ -21,12 +21,12 @@ const (
 func TestQuadraticStrategy_NewQuadraticStrategy(t *testing.T) {
 	strategy := NewQuadraticStrategy(TestQuadraticThreshold, TestQuadraticMaxThreshold, newTestLogger(t))
 
-	if strategy.threshold != TestQuadraticThreshold {
-		t.Errorf("expected threshold %d, got %d", TestQuadraticThreshold, strategy.threshold)
+	if strategy.lowerThreshold != TestQuadraticThreshold {
+		t.Errorf("expected threshold %d, got %d", TestQuadraticThreshold, strategy.lowerThreshold)
 	}
 
-	if strategy.maxThreshold != TestQuadraticMaxThreshold {
-		t.Errorf("expected maxThreshold %d, got %d", TestQuadraticMaxThreshold, strategy.maxThreshold)
+	if strategy.upperThreshold != TestQuadraticMaxThreshold {
+		t.Errorf("expected maxThreshold %d, got %d", TestQuadraticMaxThreshold, strategy.upperThreshold)
 	}
 
 	// Test initial state
@@ -46,62 +46,52 @@ func TestQuadraticStrategy_Update(t *testing.T) {
 	tests := []struct {
 		name              string
 		pendingBytes      uint64
-		targetBytes       uint64
 		expectedIntensity float64
 	}{
 		{
 			name:              "zero load",
 			pendingBytes:      0,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMin,
 		},
 		{
 			name:              "below threshold",
 			pendingBytes:      TestQuadraticThreshold / 2,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMin,
 		},
 		{
 			name:              "exactly at threshold",
 			pendingBytes:      TestQuadraticThreshold,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMin,
 		},
 		{
 			name:              "25% above threshold",
 			pendingBytes:      TestQuadraticThreshold + TestQuadraticThreshold/4,
-			targetBytes:       0,
 			expectedIntensity: 0.0625, // (0.25)^2
 		},
 		{
 			name:              "50% above threshold",
 			pendingBytes:      TestQuadraticThreshold + TestQuadraticThreshold/2,
-			targetBytes:       0,
 			expectedIntensity: 0.25, // (0.5)^2
 		},
 		{
 			name:              "75% above threshold",
 			pendingBytes:      TestQuadraticThreshold + 3*TestQuadraticThreshold/4,
-			targetBytes:       0,
 			expectedIntensity: 0.5625, // (0.75)^2
 		},
 		{
 			name:              "100% above threshold (max)",
 			pendingBytes:      TestQuadraticMaxThreshold,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMax,
 		},
 		{
 			name:              "beyond max threshold",
 			pendingBytes:      TestQuadraticMaxThreshold * 2,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMax,
 		},
 		{
 			name:              "with target bytes ignored",
 			pendingBytes:      TestQuadraticThreshold + TestQuadraticThreshold/2,
-			targetBytes:       TestQuadraticThreshold * 10, // Target bytes should be ignored
-			expectedIntensity: 0.25,                        // (0.5)^2
+			expectedIntensity: 0.25, // (0.5)^2
 		},
 	}
 

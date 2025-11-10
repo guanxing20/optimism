@@ -99,7 +99,7 @@ var (
 	RunInfoAtFlag = &cli.GenericFlag{
 		Name:     "info-at",
 		Usage:    "step pattern to print info at: " + patternHelp,
-		Value:    MustStepMatcherFlag("%100000"),
+		Value:    MustStepMatcherFlag("%1000000000"),
 		Required: false,
 	}
 	RunPProfCPU = &cli.BoolFlag{
@@ -179,6 +179,8 @@ func NewProcessPreimageOracle(name string, args []string, stdout log.Logger, std
 		pOracleRW.Reader(),
 		pOracleRW.Writer(),
 	}
+	// Discourage rust programs from using color in logs.
+	cmd.Env = append([]string{"NO_COLOR=1"}, os.Environ()...)
 
 	// Note that the client file descriptors are not closed when the pre-image server exits.
 	// So we use the FilePoller to ensure that we don't get stuck in a blocking read/write.
@@ -395,7 +397,7 @@ func Run(ctx *cli.Context) error {
 		}
 	}
 
-	state, err := versions.LoadStateFromFile(ctx.Path(RunInputFlag.Name))
+	state, err := versions.LoadStateFromFileWithLargeICache(ctx.Path(RunInputFlag.Name))
 	if err != nil {
 		return fmt.Errorf("failed to load state: %w", err)
 	}

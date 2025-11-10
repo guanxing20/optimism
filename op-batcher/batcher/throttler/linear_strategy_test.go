@@ -21,12 +21,12 @@ const (
 func TestLinearStrategy_NewLinearStrategy(t *testing.T) {
 	strategy := NewLinearStrategy(TestLinearThreshold, TestLinearMaxThreshold, newTestLogger(t))
 
-	if strategy.threshold != TestLinearThreshold {
-		t.Errorf("expected threshold %d, got %d", TestLinearThreshold, strategy.threshold)
+	if strategy.lowerThreshold != TestLinearThreshold {
+		t.Errorf("expected threshold %d, got %d", TestLinearThreshold, strategy.lowerThreshold)
 	}
 
-	if strategy.maxThreshold != TestLinearMaxThreshold {
-		t.Errorf("expected maxThreshold %d, got %d", TestLinearMaxThreshold, strategy.maxThreshold)
+	if strategy.upperThreshold != TestLinearMaxThreshold {
+		t.Errorf("expected maxThreshold %d, got %d", TestLinearMaxThreshold, strategy.upperThreshold)
 	}
 
 	// Test initial state
@@ -46,61 +46,51 @@ func TestLinearStrategy_Update(t *testing.T) {
 	tests := []struct {
 		name              string
 		pendingBytes      uint64
-		targetBytes       uint64
 		expectedIntensity float64
 	}{
 		{
 			name:              "zero load",
 			pendingBytes:      0,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMin,
 		},
 		{
 			name:              "below threshold",
 			pendingBytes:      TestLinearThreshold / 2,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMin,
 		},
 		{
 			name:              "exactly at threshold",
 			pendingBytes:      TestLinearThreshold,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMin,
 		},
 		{
 			name:              "25% above threshold",
 			pendingBytes:      TestLinearThreshold + TestLinearThreshold/4,
-			targetBytes:       0,
 			expectedIntensity: 0.25,
 		},
 		{
 			name:              "50% above threshold",
 			pendingBytes:      TestLinearThreshold + TestLinearThreshold/2,
-			targetBytes:       0,
 			expectedIntensity: 0.50,
 		},
 		{
 			name:              "75% above threshold",
 			pendingBytes:      TestLinearThreshold + 3*TestLinearThreshold/4,
-			targetBytes:       0,
 			expectedIntensity: 0.75,
 		},
 		{
 			name:              "100% above threshold (max)",
 			pendingBytes:      TestLinearMaxThreshold,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMax,
 		},
 		{
 			name:              "beyond max threshold",
 			pendingBytes:      TestLinearMaxThreshold * 2,
-			targetBytes:       0,
 			expectedIntensity: TestIntensityMax,
 		},
 		{
 			name:              "with target bytes ignored",
 			pendingBytes:      TestLinearThreshold + TestLinearThreshold/2,
-			targetBytes:       TestLinearThreshold * 10, // Target bytes should be ignored
 			expectedIntensity: 0.50,
 		},
 	}
@@ -173,12 +163,10 @@ func TestLinearStrategy_Reset(t *testing.T) {
 
 func TestLinearStrategy_EdgeCases(t *testing.T) {
 	t.Run("max threshold less than threshold", func(t *testing.T) {
-
 		require.Panics(t, func() {
 			// Test when multiplier results in maxThreshold <= threshold
 			NewLinearStrategy(TestLinearThreshold, 0, newTestLogger(t))
 		})
-
 	})
 
 	t.Run("very large multiplier", func(t *testing.T) {
